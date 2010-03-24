@@ -12,8 +12,8 @@ end
 
 function addon:strip_text (text)
 	if not text then return end
+	text = text:gsub('|c%x%x%x%x%x%x%x%x(.-)|r','%1')
 	text = text:gsub('%[.*%]%s*','')
-	text = text:gsub('|c%x%x%x%x%x%x%x%x(.+)|r','%1')
 	text = text:gsub('(.+) %(.+%)', '%1')
 	text = text:trim()
 	return text
@@ -63,6 +63,7 @@ function addon:GOSSIP_SHOW ()
 		button = _G['GossipTitleButton' .. i]
 		if button:IsVisible() then
 			text = self:strip_text(button:GetText())
+			ABCDE={button:GetText(), text}
 			if button.type == 'Available' then
 				button:Click()
 			elseif button.type == 'Active' then
