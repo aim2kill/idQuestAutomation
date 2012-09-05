@@ -1,6 +1,6 @@
 local addon = CreateFrame('Frame')
-addon.completed_quests = {}
-addon.incomplete_quests = {}
+addon.completedQuests = {}
+addon.incompleteQuests = {}
 
 function addon:canAutomate ()
   if IsShiftKeyDown() then
@@ -10,7 +10,7 @@ function addon:canAutomate ()
   end
 end
 
-function addon:strip_text (text)
+function addon:stripText (text)
   if not text then return end
   text = text:gsub('|c%x%x%x%x%x%x%x%x(.-)|r','%1')
   text = text:gsub('%[.*%]%s*','')
@@ -35,8 +35,8 @@ function addon:QUEST_LOG_UPDATE ()
   local no_objectives
   local _
 
-  self.completed_quests = {}
-  self.incomplete_quests = {}
+  self.completedQuests = {}
+  self.incompleteQuests = {}
 
   if num_entries > 0 then
     for i = 1, num_entries do
@@ -45,9 +45,9 @@ function addon:QUEST_LOG_UPDATE ()
       no_objectives = GetNumQuestLeaderBoards(i) == 0
       if title then
         if is_complete or no_objectives then
-          self.completed_quests[title] = true
+          self.completedQuests[title] = true
         else
-          self.incomplete_quests[title] = true
+          self.incompleteQuests[title] = true
         end
       end
     end
@@ -65,11 +65,11 @@ function addon:GOSSIP_SHOW ()
   for i = 1, 32 do
     button = _G['GossipTitleButton' .. i]
     if button:IsVisible() then
-      text = self:strip_text(button:GetText())
+      text = self:stripText(button:GetText())
       if button.type == 'Available' then
         button:Click()
       elseif button.type == 'Active' then
-        if self.completed_quests[text] then
+        if self.completedQuests[text] then
           button:Click()
         end
       end
@@ -86,10 +86,10 @@ function addon:QUEST_GREETING (...)
   for i = 1, 32 do
     button = _G['QuestTitleButton' .. i]
     if button:IsVisible() then
-      text = self:strip_text(button:GetText())
-      if self.completed_quests[text] then
+      text = self:stripText(button:GetText())
+      if self.completedQuests[text] then
         button:Click()
-      elseif not self.incomplete_quests[text] then
+      elseif not self.incompleteQuests[text] then
         button:Click()
       end
     end
