@@ -19,6 +19,22 @@ function addon:stripText (text)
   return text
 end
 
+function addon:QUEST_AUTOCOMPLETE (event, questId)
+  for i = 0, 6 do
+    local id = GetQuestIndexForWatch(i)
+    if id then
+      ShowQuestComplete(id)
+    end
+  end
+end
+
+function addon:QUEST_COMPLETE (event)
+  if not self:canAutomate() then return end
+  if GetNumQuestChoices() <= 1 then
+    QuestFrameCompleteQuestButton:Click()
+  end
+end
+
 function addon:QUEST_PROGRESS ()
   if not self:canAutomate() then return end
   if IsQuestCompletable() then
@@ -28,23 +44,23 @@ end
 
 function addon:QUEST_LOG_UPDATE ()
   if not self:canAutomate() then return end
-  local start_entry = GetQuestLogSelection()
-  local num_entries = GetNumQuestLogEntries()
+  local startEntry = GetQuestLogSelection()
+  local numEntries = GetNumQuestLogEntries()
   local title
-  local is_complete
-  local no_objectives
+  local isComplete
+  local noObjectives
   local _
 
   self.completedQuests = {}
   self.incompleteQuests = {}
 
-  if num_entries > 0 then
-    for i = 1, num_entries do
+  if numEntries > 0 then
+    for i = 1, numEntries do
       SelectQuestLogEntry(i)
-      title, _, _, _, _, _, is_complete = GetQuestLogTitle(i)
-      no_objectives = GetNumQuestLeaderBoards(i) == 0
+      title, _, _, _, _, _, isComplete = GetQuestLogTitle(i)
+      noObjectives = GetNumQuestLeaderBoards(i) == 0
       if title then
-        if is_complete or no_objectives then
+        if isComplete or noObjectives then
           self.completedQuests[title] = true
         else
           self.incompleteQuests[title] = true
@@ -53,7 +69,7 @@ function addon:QUEST_LOG_UPDATE ()
     end
   end
 
-  SelectQuestLogEntry(start_entry)
+  SelectQuestLogEntry(startEntry)
 end
 
 function addon:GOSSIP_SHOW ()
@@ -101,13 +117,6 @@ function addon:QUEST_DETAIL ()
   AcceptQuest()
 end
 
-function addon:QUEST_COMPLETE (event)
-  if not self:canAutomate() then return end
-  if GetNumQuestChoices() <= 1 then
-    QuestFrameCompleteQuestButton:Click()
-  end
-end
-
 function addon.onevent (self, event, ...)
   if self[event] then
     self[event](self, ...)
@@ -116,6 +125,7 @@ end
 
 addon:SetScript('OnEvent', addon.onevent)
 addon:RegisterEvent('GOSSIP_SHOW')
+addon:RegisterEvent('QUEST_AUTOCOMPLETE')
 addon:RegisterEvent('QUEST_COMPLETE')
 addon:RegisterEvent('QUEST_DETAIL')
 addon:RegisterEvent('QUEST_FINISHED')
