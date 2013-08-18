@@ -104,7 +104,7 @@ end
 function addon:QUEST_COMPLETE (event)
   if not self:canAutomate() then return end
   if GetNumQuestChoices() <= 1 then
-    GetQuestReward(QuestFrameRewardPanel.itemChoice)
+    QuestFrameCompleteQuestButton:Click()
   end
 end
 
@@ -122,4 +122,3 @@ addon:RegisterEvent('QUEST_FINISHED')
 addon:RegisterEvent('QUEST_GREETING')
 addon:RegisterEvent('QUEST_LOG_UPDATE')
 addon:RegisterEvent('QUEST_PROGRESS')
-
