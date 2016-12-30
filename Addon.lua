@@ -2,7 +2,7 @@ local addon = CreateFrame('Frame')
 addon.completedQuests = {}
 addon.incompleteQuests = {}
 
-function addon:canAutomate ()
+function addon:canAutomate()
   if IsShiftKeyDown() then
     return false
   else
@@ -10,40 +10,30 @@ function addon:canAutomate ()
   end
 end
 
-function addon:stripText (text)
+function addon:stripText(text)
   if not text then return end
-  text = text:gsub('|c%x%x%x%x%x%x%x%x(.-)|r','%1')
-  text = text:gsub('%[.*%]%s*','')
-  text = text:gsub('(.+) %(.+%)', '%1')
-  text = text:trim()
+  text = string.gsub(text, '|c%x%x%x%x%x%x%x%x(.-)|r','%1')
+  text = string.gsub(text, '%[.*%]%s*','')
+  text = string.gsub(text, '(.+) %(.+%)', '%1')
   return text
 end
 
-function addon:QUEST_AUTOCOMPLETE (event, questId)
-  for i = 0, 6 do
-    local id = GetQuestIndexForWatch(i)
-    if id then
-      ShowQuestComplete(id)
-    end
-  end
-end
-
-function addon:QUEST_COMPLETE (event)
-  if not self:canAutomate() then return end
+function addon:QUEST_COMPLETE(event)
+  if not addon:canAutomate() then return end
   if GetNumQuestChoices() <= 1 then
     QuestFrameCompleteQuestButton:Click()
   end
 end
 
-function addon:QUEST_PROGRESS ()
-  if not self:canAutomate() then return end
+function addon:QUEST_PROGRESS()
+  if not addon:canAutomate() then return end
   if IsQuestCompletable() then
     CompleteQuest()
   end
 end
 
-function addon:QUEST_LOG_UPDATE ()
-  if not self:canAutomate() then return end
+function addon:QUEST_LOG_UPDATE()
+  if not addon:canAutomate() then return end
   local startEntry = GetQuestLogSelection()
   local numEntries = GetNumQuestLogEntries()
   local title
@@ -51,8 +41,8 @@ function addon:QUEST_LOG_UPDATE ()
   local noObjectives
   local _
 
-  self.completedQuests = {}
-  self.incompleteQuests = {}
+  addon.completedQuests = {}
+  addon.incompleteQuests = {}
 
   if numEntries > 0 then
     for i = 1, numEntries do
@@ -61,9 +51,9 @@ function addon:QUEST_LOG_UPDATE ()
       noObjectives = GetNumQuestLeaderBoards(i) == 0
       if title then
         if isComplete or noObjectives then
-          self.completedQuests[title] = true
+          addon.completedQuests[title] = true
         else
-          self.incompleteQuests[title] = true
+          addon.incompleteQuests[title] = true
         end
       end
     end
@@ -72,20 +62,20 @@ function addon:QUEST_LOG_UPDATE ()
   SelectQuestLogEntry(startEntry)
 end
 
-function addon:GOSSIP_SHOW ()
-  if not self:canAutomate() then return end
+function addon:GOSSIP_SHOW()
+  if not addon:canAutomate() then return end
 
   local button
   local text
 
   for i = 1, 32 do
-    button = _G['GossipTitleButton' .. i]
+    button = getglobal('GossipTitleButton' .. i)
     if button:IsVisible() then
-      text = self:stripText(button:GetText())
+      text = addon:stripText(button:GetText())
       if button.type == 'Available' then
         button:Click()
       elseif button.type == 'Active' then
-        if self.completedQuests[text] then
+        if addon.completedQuests[text] then
           button:Click()
         end
       end
@@ -93,39 +83,38 @@ function addon:GOSSIP_SHOW ()
   end
 end
 
-function addon:QUEST_GREETING (...)
-  if not self:canAutomate() then return end
+function addon:QUEST_GREETING(...)
+  if not addon:canAutomate() then return end
 
   local button
   local text
 
   for i = 1, 32 do
-    button = _G['QuestTitleButton' .. i]
+    button = getglobal('QuestTitleButton' .. i)
     if button:IsVisible() then
-      text = self:stripText(button:GetText())
-      if self.completedQuests[text] then
+      text = addon:stripText(button:GetText())
+      if addon.completedQuests[text] then
         button:Click()
-      elseif not self.incompleteQuests[text] then
+      elseif not addon.incompleteQuests[text] then
         button:Click()
       end
     end
   end
 end
 
-function addon:QUEST_DETAIL ()
-  if not self:canAutomate() then return end
+function addon:QUEST_DETAIL()
+  if not addon:canAutomate() then return end
   AcceptQuest()
 end
 
-function addon.onevent (self, event, ...)
-  if self[event] then
-    self[event](self, ...)
+addon:SetScript('OnEvent', function()
+  local handler = addon[event]
+  if handler then
+    handler(addon, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
   end
-end
+end)
 
-addon:SetScript('OnEvent', addon.onevent)
 addon:RegisterEvent('GOSSIP_SHOW')
-addon:RegisterEvent('QUEST_AUTOCOMPLETE')
 addon:RegisterEvent('QUEST_COMPLETE')
 addon:RegisterEvent('QUEST_DETAIL')
 addon:RegisterEvent('QUEST_FINISHED')

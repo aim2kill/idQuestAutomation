@@ -1,7 +1,6 @@
-## Interface: 60200
+## Interface: 11200
 ## Title: idQuestAutomation
 ## Notes: Skips social dialogue, automates quest accepting/turning in.
 ## Author: Industrial
 
 Addon.lua
-
