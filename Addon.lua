@@ -18,21 +18,70 @@ function addon:stripText(text)
   return text
 end
 
+function addon:GOSSIP_SHOW()
+  -- ChatFrame1:AddMessage('GOSSIP_SHOW')
+
+  if not addon:canAutomate() then return end
+
+  local button
+  local text
+
+  for i = 1, 32 do
+    button = getglobal('GossipTitleButton' .. i)
+    if button:IsVisible() then
+      text = addon:stripText(button:GetText())
+      if button.type == 'Available' then
+        button:Click()
+      elseif button.type == 'Active' then
+        if addon.completedQuests[text] then
+          button:Click()
+        end
+      end
+    end
+  end
+end
+
 function addon:QUEST_COMPLETE(event)
+  -- ChatFrame1:AddMessage('QUEST_COMPLETE')
+
   if not addon:canAutomate() then return end
   if GetNumQuestChoices() <= 1 then
     QuestFrameCompleteQuestButton:Click()
   end
 end
 
-function addon:QUEST_PROGRESS()
+function addon:QUEST_DETAIL()
+  -- ChatFrame1:AddMessage('QUEST_DETAIL')
+
   if not addon:canAutomate() then return end
-  if IsQuestCompletable() then
-    CompleteQuest()
+
+  AcceptQuest()
+end
+
+function addon:QUEST_GREETING()
+  -- ChatFrame1:AddMessage('QUEST_GREETING')
+
+  if not addon:canAutomate() then return end
+
+  local button
+  local text
+
+  for i = 1, 32 do
+    button = getglobal('QuestTitleButton' .. i)
+    if button:IsVisible() then
+      text = addon:stripText(button:GetText())
+      if addon.completedQuests[text] then
+        button:Click()
+      elseif not addon.incompleteQuests[text] then
+        button:Click()
+      end
+    end
   end
 end
 
 function addon:QUEST_LOG_UPDATE()
+  -- ChatFrame1:AddMessage('QUEST_LOG_UPDATE')
+
   if not addon:canAutomate() then return end
   local startEntry = GetQuestLogSelection()
   local numEntries = GetNumQuestLogEntries()
@@ -62,49 +111,13 @@ function addon:QUEST_LOG_UPDATE()
   SelectQuestLogEntry(startEntry)
 end
 
-function addon:GOSSIP_SHOW()
+function addon:QUEST_PROGRESS()
+  -- ChatFrame1:AddMessage('QUEST_PROGRESS')
+
   if not addon:canAutomate() then return end
-
-  local button
-  local text
-
-  for i = 1, 32 do
-    button = getglobal('GossipTitleButton' .. i)
-    if button:IsVisible() then
-      text = addon:stripText(button:GetText())
-      if button.type == 'Available' then
-        button:Click()
-      elseif button.type == 'Active' then
-        if addon.completedQuests[text] then
-          button:Click()
-        end
-      end
-    end
+  if IsQuestCompletable() then
+    CompleteQuest()
   end
-end
-
-function addon:QUEST_GREETING(...)
-  if not addon:canAutomate() then return end
-
-  local button
-  local text
-
-  for i = 1, 32 do
-    button = getglobal('QuestTitleButton' .. i)
-    if button:IsVisible() then
-      text = addon:stripText(button:GetText())
-      if addon.completedQuests[text] then
-        button:Click()
-      elseif not addon.incompleteQuests[text] then
-        button:Click()
-      end
-    end
-  end
-end
-
-function addon:QUEST_DETAIL()
-  if not addon:canAutomate() then return end
-  AcceptQuest()
 end
 
 addon:SetScript('OnEvent', function()
@@ -117,7 +130,6 @@ end)
 addon:RegisterEvent('GOSSIP_SHOW')
 addon:RegisterEvent('QUEST_COMPLETE')
 addon:RegisterEvent('QUEST_DETAIL')
-addon:RegisterEvent('QUEST_FINISHED')
 addon:RegisterEvent('QUEST_GREETING')
 addon:RegisterEvent('QUEST_LOG_UPDATE')
 addon:RegisterEvent('QUEST_PROGRESS')
