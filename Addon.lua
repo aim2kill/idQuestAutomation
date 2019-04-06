@@ -3,10 +3,10 @@ addon.completedQuests = {}
 addon.incompleteQuests = {}
 
 function addon:canAutomate ()
-  if IsShiftKeyDown() then
-    return false
-  else
+  if IsShiftKeyDown()
     return true
+  else
+    return false
   end
 end
 
